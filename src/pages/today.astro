@@ -1,42 +1,54 @@
 ---
-import PageLayout from '../layouts/PageLayout.astro';
+import TerminalLayout from '../layouts/TerminalLayout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const today = new Date().toISOString().split('T')[0];
+const today = new Date();
+const todayStr = today.toISOString().split('T')[0];
+const todayFile = `${todayStr}.md`;
+
+const contentDir = path.join(process.cwd(), 'src', 'content', 'publish');
+const todayPath = path.join(contentDir, 'daily', todayFile);
+
+let todayContent = null;
+let exists = false;
+
+if (fs.existsSync(todayPath)) {
+  exists = true;
+  const raw = fs.readFileSync(todayPath, 'utf-8');
+  const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (match) {
+    const fm: Record<string, string> = {};
+    match[1].split('\n').forEach(line => {
+      const [key, ...rest] = line.split(':');
+      if (key && rest.length) {
+        fm[key.trim()] = rest.join(':').trim().replace(/^["']|["']$/g, '');
+      }
+    });
+    todayContent = {
+      title: fm.title || 'Today',
+      date: fm.date || todayStr,
+      content: match[2].trim()
+    };
+  }
+}
 ---
 
-<PageLayout title="Today - Abdullah Shahid" description="Daily log">
-  <section>
-    <h1 class="text-2xl font-bold text-terminal-fg mb-2">Today</h1>
-    <p class="text-terminal-dim mb-6">{today}</p>
+<TerminalLayout title="today">
+  <div class="pane" style="grid-column: 1 / -1; grid-row: 1 / -1; overflow: auto;">
+    <div class="pane-header">today // {todayStr}</div>
     
-    <div class="space-y-8">
-      <div>
-        <h2 class="text-terminal-fg font-semibold mb-3">What I Worked On</h2>
-        <ul class="list-disc list-inside text-gray-300 space-y-1">
-          <li>Building personal site</li>
-        </ul>
-      </div>
-      
-      <div>
-        <h2 class="text-terminal-fg font-semibold mb-3">What I Learned</h2>
-        <ul class="list-disc list-inside text-gray-300 space-y-1">
-          <li>Something new today</li>
-        </ul>
-      </div>
-      
-      <div>
-        <h2 class="text-terminal-fg font-semibold mb-3">Blockers</h2>
-        <ul class="list-disc list-inside text-gray-300 space-y-1">
-          <li>None</li>
-        </ul>
-      </div>
-      
-      <div>
-        <h2 class="text-terminal-fg font-semibold mb-3">Ideas</h2>
-        <ul class="list-disc list-inside text-gray-300 space-y-1">
-          <li>Future ideas go here</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-</PageLayout>
+    {exists && todayContent ? (
+      <article>
+        <h1 class="text-xl mb-4">{todayContent.title}</h1>
+        <div class="content">
+          {todayContent.content.split('\n').map(line => (
+            <p class="mb-2">{line}</p>
+          ))}
+        </div>
+      </article>
+    ) : (
+      <div class="text-meta">no entry for today</div>
+    )}
+  </div>
+</TerminalLayout>

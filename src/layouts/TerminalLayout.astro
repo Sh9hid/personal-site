@@ -1,0 +1,241 @@
+---
+import '../styles/terminal.css';
+
+interface Props {
+  title?: string;
+}
+
+const { title = 'terminal' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en" data-theme="mono">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#8EF57C] focus:text-[#0B0B0B]">
+      Skip to content
+    </a>
+    
+    <div id="main-content" class="split-grid" role="grid" aria-label="Four pane layout">
+      <slot />
+    </div>
+
+    <footer class="command-bar" role="region" aria-label="Command bar">
+      <span class="prompt">:</span>
+      <input 
+        type="text" 
+        id="vim-command-input"
+        class="command-bar-input"
+        placeholder="type command or / for slash commands"
+        aria-label="Vim command input"
+        autocomplete="off"
+        spellcheck="off"
+      />
+      <span class="command-bar-hint">Ctrl+HJKL:panes | R:graph reset | Enter:maximize</span>
+    </footer>
+
+    <div id="command-palette" class="hidden fixed inset-0 bg-black/80 z-50" role="dialog" aria-label="Command palette">
+      <div class="p-4" onclick="event.stopPropagation()">
+        <input
+          type="text"
+          id="slash-command-input"
+          placeholder="Type command..."
+          class="w-full bg-transparent text-[#8EF57C] placeholder-[#6E6E6E] font-mono"
+          autocomplete="off"
+          aria-label="Slash command input"
+        />
+        <div id="slash-command-list" class="mt-2"></div>
+      </div>
+    </div>
+
+    <script>
+      import { commands } from '../lib/commands';
+      import { keyBindings, initKeyBindings } from '../lib/keybindings';
+      import { vimCommands, searchVimCommands } from '../lib/vim-commands';
+
+      // Initialize keybindings
+      initKeyBindings();
+
+      // Theme persistence
+      const savedTheme = localStorage.getItem('theme') || 'mono';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+
+      // Command bar handling
+      const vimInput = document.getElementById('vim-command-input') as HTMLInputElement;
+      const slashInput = document.getElementById('slash-command-input') as HTMLInputElement;
+      const slashPalette = document.getElementById('command-palette') as HTMLElement;
+      const slashList = document.getElementById('slash-command-list');
+
+      let vimSelectedIndex = 0;
+      let slashSelectedIndex = 0;
+
+      // Vim command input handling
+      vimInput?.addEventListener('input', () => {
+        const results = searchVimCommands(vimInput.value);
+        vimSelectedIndex = 0;
+        renderVimSuggestions(results);
+      });
+
+      vimInput?.addEventListener('keydown', (e) => {
+        const results = searchVimCommands(vimInput.value);
+        
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          vimSelectedIndex = Math.min(vimSelectedIndex + 1, results.length - 1);
+          renderVimSuggestions(results, vimSelectedIndex);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          vimSelectedIndex = Math.max(vimSelectedIndex - 1, 0);
+          renderVimSuggestions(results, vimSelectedIndex);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (results[vimSelectedIndex]) {
+            results[vimSelectedIndex].action();
+            vimInput.value = '';
+            vimInput.blur();
+          }
+        } else if (e.key === 'Escape') {
+          vimInput.value = '';
+          vimInput.blur();
+        }
+      });
+
+      vimInput?.addEventListener('blur', () => {
+        setTimeout(() => {
+          vimInput.value = '';
+          renderVimSuggestions([]);
+        }, 200);
+      });
+
+      function renderVimSuggestions(results: typeof vimCommands, selectedIndex = 0) {
+        if (!slashList) return;
+        
+        if (results.length === 0 && vimInput?.value) {
+          slashList.innerHTML = '<div class="text-[#6E6E6E]">No matching commands</div>';
+          return;
+        }
+
+        slashList.innerHTML = results.slice(0, 8).map((cmd, i) => `
+          <div class="command-item ${i === selectedIndex ? 'selected' : ''}" data-index="${i}">
+            <span class="text-[#8EF57C]">${cmd.label}</span>
+            <span class="text-[#6E6E6E] ml-2">${cmd.description}</span>
+          </div>
+        `).join('');
+      }
+
+      // Slash command handling
+      window.addEventListener('open-command-palette', () => {
+        slashPalette.classList.remove('hidden');
+        slashInput?.focus();
+        slashSelectedIndex = 0;
+        renderSlashSuggestions(commands);
+      });
+
+      window.addEventListener('close-overlays', () => {
+        slashPalette.classList.add('hidden');
+        vimInput?.blur();
+        if (slashInput) slashInput.value = '';
+      });
+
+      slashInput?.addEventListener('input', () => {
+        const results = commands.filter(cmd => 
+          cmd.label.toLowerCase().includes(slashInput.value.toLowerCase()) ||
+          cmd.keywords.some(k => k.toLowerCase().includes(slashInput.value.toLowerCase()))
+        );
+        slashSelectedIndex = 0;
+        renderSlashSuggestions(results);
+      });
+
+      slashInput?.addEventListener('keydown', (e) => {
+        const results = commands.filter(cmd => 
+          cmd.label.toLowerCase().includes(slashInput.value.toLowerCase()) ||
+          cmd.keywords.some(k => k.toLowerCase().includes(slashInput.value.toLowerCase()))
+        );
+
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          slashSelectedIndex = Math.min(slashSelectedIndex + 1, results.length - 1);
+          renderSlashSuggestions(results, slashSelectedIndex);
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          slashSelectedIndex = Math.max(slashSelectedIndex - 1, 0);
+          renderSlashSuggestions(results, slashSelectedIndex);
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (results[slashSelectedIndex]) {
+            results[slashSelectedIndex].action();
+            slashPalette.classList.add('hidden');
+          }
+        } else if (e.key === 'Escape') {
+          slashPalette.classList.add('hidden');
+        }
+      });
+
+      slashPalette?.addEventListener('click', () => {
+        slashPalette.classList.add('hidden');
+      });
+
+      function renderSlashSuggestions(results: typeof commands, selectedIndex = 0) {
+        if (!slashList) return;
+        
+        slashList.innerHTML = results.slice(0, 10).map((cmd, i) => `
+          <div class="command-item ${i === selectedIndex ? 'selected' : ''}" data-index="${i}">
+            <span class="text-[#8EF57C]">${cmd.label}</span>
+            <span class="text-[#6E6E6E] ml-2">${cmd.description}</span>
+            <span class="text-[#4B4B4B] ml-auto text-xs">${cmd.category}</span>
+          </div>
+        `).join('');
+      }
+
+      // Pane navigation
+      const panes = document.querySelectorAll('.pane');
+      let activePane = 0;
+
+      function updateActivePane() {
+        panes.forEach((pane, i) => {
+          pane.classList.toggle('pane-active', i === activePane);
+        });
+      }
+
+      window.addEventListener('pane-left', () => {
+        activePane = activePane % 2 === 0 ? activePane + 1 : activePane - 1;
+        updateActivePane();
+      });
+
+      window.addEventListener('pane-right', () => {
+        activePane = activePane % 2 === 0 ? activePane + 1 : activePane - 1;
+        updateActivePane();
+      });
+
+      window.addEventListener('pane-up', () => {
+        if (activePane >= 2) activePane -= 2;
+        updateActivePane();
+      });
+
+      window.addEventListener('pane-down', () => {
+        if (activePane < 2) activePane += 2;
+        updateActivePane();
+      });
+
+      window.addEventListener('pane-maximize', () => {
+        document.querySelector('.split-grid')?.classList.toggle('maximized');
+      });
+
+      window.addEventListener('close-command-bar', () => {
+        vimInput.value = '';
+        vimInput.blur();
+      });
+
+      updateActivePane();
+    </script>
+  </body>
+</html>

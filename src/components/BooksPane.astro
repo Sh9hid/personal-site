@@ -1,0 +1,37 @@
+---
+interface BookEntry {
+  id: string;
+  title: string;
+  authors: string[];
+  status: 'read' | 'to-read' | 'reading';
+  year: number;
+  rating?: number;
+}
+
+interface Props {
+  books: BookEntry[];
+}
+
+const { books } = Astro.props;
+const sortedBooks = [...books].sort((a, b) => b.year - a.year);
+---
+
+<div class="pane" role="gridcell" aria-label="Books pane" tabindex="0">
+  <div class="pane-header">books</div>
+  
+  {sortedBooks.length > 0 ? (
+    <div class="entries">
+      {sortedBooks.map(book => (
+        <div class="entry-item">
+          <span class="entry-date">{book.year}</span>
+          <span class="entry-title">{book.title}</span>
+          {book.status === 'read' && book.rating && (
+            <span class="text-accent ml-1">{'★'.repeat(book.rating)}</span>
+          )}
+        </div>
+      ))}
+    </div>
+  ) : (
+    <div class="meta">no books</div>
+  )}
+</div>

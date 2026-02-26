@@ -1,0 +1,32 @@
+---
+interface BuildEntry {
+  slug: string;
+  title: string;
+  date: string;
+  tags: string[];
+}
+
+interface Props {
+  builds: BuildEntry[];
+}
+
+const { builds } = Astro.props;
+const sortedBuilds = builds.sort((a, b) => b.date.localeCompare(a.date));
+---
+
+<div class="pane" role="gridcell" aria-label="Builds pane" tabindex="0">
+  <div class="pane-header">builds</div>
+  
+  {sortedBuilds.length > 0 ? (
+    <div class="entries">
+      {sortedBuilds.map(build => (
+        <a href={`/builds/${build.slug}`} class="entry-item block">
+          <span class="entry-date">{build.date}</span>
+          <span class="entry-title">{build.title}</span>
+        </a>
+      ))}
+    </div>
+  ) : (
+    <div class="meta">no builds</div>
+  )}
+</div>

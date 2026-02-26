@@ -1,0 +1,107 @@
+---
+import TerminalLayout from '../layouts/TerminalLayout.astro';
+import { getKeyBindingsForDisplay } from '../lib/keybindings';
+import { commands } from '../lib/commands';
+import { vimCommands } from '../lib/vim-commands';
+
+const keyBindings = getKeyBindingsForDisplay();
+
+// Group keybindings
+const navigationBindings = keyBindings.filter(k => 
+  k.description.includes('Go to') || k.key.includes('g ')
+);
+
+const paneBindings = keyBindings.filter(k => 
+  k.description.includes('pane') || k.key.includes('Ctrl')
+);
+
+const graphBindings = keyBindings.filter(k => 
+  k.description.includes('graph') || k.key === 'r' || k.key === 'f'
+);
+
+const slashCommands = commands.map(c => ({
+  key: '/' + c.label.toLowerCase(),
+  description: c.description
+}));
+
+const vimCmds = vimCommands.map(c => ({
+  key: c.label,
+  description: c.description
+}));
+---
+
+<TerminalLayout title="shortcuts">
+  <div class="pane" style="grid-column: 1 / -1; grid-row: 1 / -1; overflow: auto;">
+    <div class="pane-header">keyboard shortcuts</div>
+    
+    <section class="mb-6">
+      <h2 class="text-meta mb-2">// navigation</h2>
+      <table class="w-full" style="border-collapse: collapse;">
+        <tbody>
+          {navigationBindings.map(binding => (
+            <tr>
+              <td class="py-1"><code class="text-accent">{binding.key}</code></td>
+              <td class="py-1 text-meta">{binding.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-meta mb-2">// pane controls</h2>
+      <table class="w-full" style="border-collapse: collapse;">
+        <tbody>
+          {paneBindings.map(binding => (
+            <tr>
+              <td class="py-1"><code class="text-accent">{binding.key}</code></td>
+              <td class="py-1 text-meta">{binding.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-meta mb-2">// graph controls</h2>
+      <table class="w-full" style="border-collapse: collapse;">
+        <tbody>
+          {graphBindings.map(binding => (
+            <tr>
+              <td class="py-1"><code class="text-accent">{binding.key}</code></td>
+              <td class="py-1 text-meta">{binding.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-meta mb-2">// slash commands</h2>
+      <table class="w-full" style="border-collapse: collapse;">
+        <tbody>
+          {slashCommands.map(cmd => (
+            <tr>
+              <td class="py-1"><code class="text-accent">{cmd.key}</code></td>
+              <td class="py-1 text-meta">{cmd.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-meta mb-2">// vim commands</h2>
+      <table class="w-full" style="border-collapse: collapse;">
+        <tbody>
+          {vimCmds.map(cmd => (
+            <tr>
+              <td class="py-1"><code class="text-accent">{cmd.key}</code></td>
+              <td class="py-1 text-meta">{cmd.description}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  </div>
+</TerminalLayout>

@@ -1,7 +1,6 @@
 import { defineCollection, z } from 'astro:content';
 
 const publishSchema = z.object({
-  id: z.string(),
   title: z.string(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   type: z.enum(['project', 'build', 'reading', 'note', 'daily']),
@@ -10,6 +9,10 @@ const publishSchema = z.object({
   publish: z.boolean(),
   url: z.string().optional(),
   repo: z.string().optional(),
+  isbn: z.string().optional(),
+  rating: z.number().optional(),
+  status: z.enum(['read', 'to-read', 'reading']).optional(),
+  date_read: z.string().optional(),
 });
 
 export const collections = {

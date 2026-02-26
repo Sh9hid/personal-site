@@ -1,0 +1,262 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #0B0B0B;
+    --text: #C8C8C8;
+    --meta: #6E6E6E;
+    --accent: #8EF57C;
+    --link: #4B4B4B;
+    --border: #1a1a1a;
+  }
+
+  [data-theme="dev"] {
+    --accent: #7CB3F1;
+    --link: #5A7A9A;
+  }
+
+  * {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  html {
+    font-size: 12px;
+    line-height: 1.25;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  a {
+    color: var(--link);
+    text-decoration: none;
+  }
+
+  a:hover {
+    color: var(--accent);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 400;
+    margin: 0;
+    font-size: inherit;
+  }
+
+  input, textarea {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  ::selection {
+    background: var(--accent);
+    color: var(--bg);
+  }
+
+  :focus {
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@layer components {
+  .pane {
+    border: 1px solid var(--border);
+    overflow: auto;
+    padding: 8px;
+    height: 100%;
+  }
+
+  .pane-header {
+    font-size: 11px;
+    color: var(--meta);
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .pane-active {
+    border-color: var(--accent);
+  }
+
+  .nav-link {
+    color: var(--meta);
+    padding: 2px 0;
+  }
+
+  .nav-link:hover {
+    color: var(--accent);
+  }
+
+  .meta {
+    color: var(--meta);
+    font-size: 11px;
+  }
+
+  .accent {
+    color: var(--accent);
+  }
+
+  .prompt {
+    color: var(--accent);
+  }
+
+  .command-input {
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-family: inherit;
+    font-size: inherit;
+    width: 100%;
+  }
+
+  .command-input::placeholder {
+    color: var(--meta);
+  }
+
+  .command-item {
+    padding: 2px 0;
+    cursor: pointer;
+  }
+
+  .command-item:hover,
+  .command-item.selected {
+    background: var(--border);
+  }
+
+  .entry-item {
+    padding: 2px 0;
+    display: flex;
+    gap: 8px;
+  }
+
+  .entry-date {
+    color: var(--meta);
+    font-size: 11px;
+    min-width: 80px;
+  }
+
+  .entry-title {
+    color: var(--text);
+  }
+
+  .entry-type {
+    color: var(--meta);
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+
+  #graph-canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  .tooltip {
+    position: absolute;
+    background: var(--bg);
+    border: 1px solid var(--accent);
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--text);
+    pointer-events: none;
+    z-index: 1000;
+  }
+}
+
+@layer utilities {
+  .text-accent { color: var(--accent); }
+  .text-meta { color: var(--meta); }
+  .text-link { color: var(--link); }
+  .bg-base { background-color: var(--bg); }
+  .border-subtle { border-color: var(--border); }
+
+  .zen-mode .pane:not(:first-child) {
+    display: none;
+  }
+
+  .zen-mode .pane:first-child {
+    width: 100%;
+    height: 100%;
+  }
+
+  .show-line-numbers .entry-date::before {
+    content: attr(data-line);
+    margin-right: 8px;
+    color: var(--meta);
+  }
+
+  .word-wrap {
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+}
+
+/* Grid layout */
+.split-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  height: calc(100vh - 24px);
+  gap: 1px;
+  background: var(--border);
+}
+
+.split-grid.maximized {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+/* Command bar */
+.command-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 24px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.command-bar-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.command-bar-hint {
+  color: var(--meta);
+  margin-left: 8px;
+}

@@ -1,0 +1,256 @@
+---
+interface Props {
+  graphData?: {
+    nodes: Array<{ id: string; title: string; type: string; tags: string[] }>;
+    links: Array<{ source: string; target: string; weight: number }>;
+  };
+}
+
+const { graphData } = Astro.props;
+const hasGraph = graphData && graphData.nodes.length > 0;
+---
+
+<div class="pane" role="gridcell" aria-label="Graph pane" tabindex="0" id="graph-pane">
+  <div class="pane-header">graph</div>
+  
+  {hasGraph ? (
+    <div id="graph-container" class="relative" style="height: calc(100% - 30px);">
+      <canvas 
+        id="graph-canvas" 
+        aria-label="Knowledge graph - use R to reset, F to focus selected"
+        role="img"
+      ></canvas>
+      <div id="graph-tooltip" class="tooltip hidden"></div>
+    </div>
+  ) : (
+    <div class="meta">no graph data</div>
+  )}
+</div>
+
+{hasGraph && (
+<script define:vars={{ graphData: graphData }}>
+  (function() {
+    const canvas = document.getElementById('graph-canvas');
+    const container = document.getElementById('graph-container');
+    const tooltip = document.getElementById('graph-tooltip');
+    
+    if (!canvas || !container) return;
+    
+    const ctx = canvas.getContext('2d');
+    const nodes = graphData.nodes.map(n => ({ ...n, x: 0, y: 0, vx: 0, vy: 0 }));
+    const links = graphData.links.map(l => ({
+      source: nodes.find(n => n.id === l.source),
+      target: nodes.find(n => n.id === l.target),
+      weight: l.weight
+    })).filter(l => l.source && l.target);
+
+    // Color by type
+    const colors = {
+      build: '#8EF57C',
+      project: '#7CB3F1',
+      reading: '#F1B37C',
+      daily: '#B37CF1',
+      book: '#F17CB3',
+      note: '#6E6E6E'
+    };
+
+    function resize() {
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+    }
+    
+    resize();
+    window.addEventListener('resize', resize);
+
+    // Initialize positions
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    nodes.forEach((node, i) => {
+      const angle = (i / nodes.length) * Math.PI * 2;
+      const radius = Math.min(canvas.width, canvas.height) * 0.3;
+      node.x = centerX + Math.cos(angle) * radius;
+      node.y = centerY + Math.sin(angle) * radius;
+    });
+
+    // Simple force simulation
+    function simulate() {
+      // Repulsion
+      for (let i = 0; i < nodes.length; i++) {
+        for (let j = i + 1; j < nodes.length; j++) {
+          const dx = nodes[j].x - nodes[i].x;
+          const dy = nodes[j].y - nodes[i].y;
+          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+          const force = 5000 / (dist * dist);
+          const fx = (dx / dist) * force;
+          const fy = (dy / dist) * force;
+          nodes[i].vx -= fx;
+          nodes[i].vy -= fy;
+          nodes[j].vx += fx;
+          nodes[j].vy += fy;
+        }
+      }
+
+      // Attraction (links)
+      for (const link of links) {
+        if (!link.source || !link.target) continue;
+        const dx = link.target.x - link.source.x;
+        const dy = link.target.y - link.source.y;
+        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
+        const force = dist * 0.01;
+        const fx = (dx / dist) * force;
+        const fy = (dy / dist) * force;
+        link.source.vx += fx;
+        link.source.vy += fy;
+        link.target.vx -= fx;
+        link.target.vy -= fy;
+      }
+
+      // Center gravity
+      for (const node of nodes) {
+        const dx = centerX - node.x;
+        const dy = centerY - node.y;
+        node.vx += dx * 0.001;
+        node.vy += dy * 0.001;
+      }
+
+      // Apply velocity with damping
+      for (const node of nodes) {
+        node.vx *= 0.9;
+        node.vy *= 0.9;
+        node.x += node.vx;
+        node.y += node.vy;
+        
+        // Bounds
+        node.x = Math.max(20, Math.min(canvas.width - 20, node.x));
+        node.y = Math.max(20, Math.min(canvas.height - 20, node.y));
+      }
+    }
+
+    function draw() {
+      ctx.fillStyle = '#0B0B0B';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Links
+      ctx.strokeStyle = '#1a1a1a';
+      ctx.lineWidth = 1;
+      for (const link of links) {
+        if (!link.source || !link.target) continue;
+        ctx.beginPath();
+        ctx.moveTo(link.source.x, link.source.y);
+        ctx.lineTo(link.target.x, link.target.y);
+        ctx.stroke();
+      }
+
+      // Nodes
+      for (const node of nodes) {
+        const color = colors[node.type] || colors.note;
+        const size = 3 + (node.tags?.length || 0);
+        
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, size, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+      }
+    }
+
+    let animationId;
+    function animate() {
+      simulate();
+      draw();
+      animationId = requestAnimationFrame(animate);
+    }
+    
+    animate();
+
+    // Interaction
+    let selectedNode = null;
+    let hoveredNode = null;
+    let isDragging = false;
+    let dragNode = null;
+    let transform = { x: 0, y: 0, scale: 1 };
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left - transform.x) / transform.scale;
+      const my = (e.clientY - rect.top - transform.y) / transform.scale;
+
+      if (isDragging && dragNode) {
+        dragNode.x = mx;
+        dragNode.y = my;
+        return;
+      }
+
+      // Find hovered node
+      hoveredNode = null;
+      for (const node of nodes) {
+        const dx = mx - node.x;
+        const dy = my - node.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 10) {
+          hoveredNode = node;
+          break;
+        }
+      }
+
+      if (hoveredNode) {
+        canvas.style.cursor = 'pointer';
+        tooltip.textContent = `${hoveredNode.title} (${hoveredNode.type})`;
+        tooltip.classList.remove('hidden');
+        tooltip.style.left = (e.clientX + 10) + 'px';
+        tooltip.style.top = (e.clientY + 10) + 'px';
+      } else {
+        canvas.style.cursor = 'default';
+        tooltip.classList.add('hidden');
+      }
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      if (hoveredNode) {
+        isDragging = true;
+        dragNode = hoveredNode;
+      }
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      if (hoveredNode && !isDragging) {
+        // Navigate to node
+        window.location.href = '/' + hoveredNode.type + 's';
+      }
+      isDragging = false;
+      dragNode = null;
+    });
+
+    canvas.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      transform.scale *= delta;
+      transform.scale = Math.max(0.5, Math.min(2, transform.scale));
+    });
+
+    // Keyboard controls
+    window.addEventListener('graph-reset', () => {
+      transform = { x: 0, y: 0, scale: 1 };
+      nodes.forEach((node, i) => {
+        const angle = (i / nodes.length) * Math.PI * 2;
+        const radius = Math.min(canvas.width, canvas.height) * 0.3;
+        node.x = centerX + Math.cos(angle) * radius;
+        node.y = centerY + Math.sin(angle) * radius;
+        node.vx = 0;
+        node.vy = 0;
+      });
+    });
+
+    window.addEventListener('graph-focus', () => {
+      if (selectedNode) {
+        transform.x = canvas.width / 2 - selectedNode.x * transform.scale;
+        transform.y = canvas.height / 2 - selectedNode.y * transform.scale;
+      }
+    });
+
+    window.addEventListener('focus-graph', () => {
+      canvas.focus();
+    });
+  })();
+</script>
+)}

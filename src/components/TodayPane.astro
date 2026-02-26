@@ -1,0 +1,30 @@
+---
+interface Props {
+  todayContent?: {
+    title: string;
+    date: string;
+    content: string;
+  };
+  hasToday: boolean;
+}
+
+const { todayContent, hasToday } = Astro.props;
+---
+
+<div class="pane" role="gridcell" aria-label="Today pane" tabindex="0">
+  <div class="pane-header">today</div>
+  
+  {hasToday && todayContent ? (
+    <article>
+      <div class="meta mb-2">{todayContent.date}</div>
+      <div class="entry-title text-lg mb-4">{todayContent.title}</div>
+      <div class="content">
+        {todayContent.content.split('\n').map(line => (
+          <p class="mb-1">{line}</p>
+        ))}
+      </div>
+    </article>
+  ) : (
+    <div class="meta">no entry for today</div>
+  )}
+</div>

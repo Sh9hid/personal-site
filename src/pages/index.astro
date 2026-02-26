@@ -1,14 +1,108 @@
 ---
-import PageLayout from '../layouts/PageLayout.astro';
-import TerminalHero from '../components/TerminalHero.astro';
+import TerminalLayout from '../layouts/TerminalLayout.astro';
+import TodayPane from '../components/TodayPane.astro';
+import GraphPane from '../components/GraphPane.astro';
+import BuildsPane from '../components/BuildsPane.astro';
+import BooksPane from '../components/BooksPane.astro';
+import { getCollection } from 'astro:content';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const latestPosts = [
-  { title: 'Welcome to my site', date: '2026-01-01', type: 'note', url: '/now' },
-  { title: 'My Tech Stack', date: '2026-01-15', type: 'note', url: '/stack' },
-  { title: 'Currently Reading', date: '2026-02-01', type: 'reading', url: '/reading' },
-];
+const contentDir = path.join(process.cwd(), 'src', 'content', 'publish');
+
+// Get today's date
+const today = new Date();
+const todayStr = today.toISOString().split('T')[0];
+const todayFile = `${todayStr}.md`;
+
+// Try to get today's note
+let todayContent = null;
+let hasToday = false;
+
+try {
+  const todayPath = path.join(contentDir, 'daily', todayFile);
+  if (fs.existsSync(todayPath)) {
+    const content = fs.readFileSync(todayPath, 'utf-8');
+    const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    if (match) {
+      const frontmatter: Record<string, string> = {};
+      match[1].split('\n').forEach(line => {
+        const [key, ...rest] = line.split(':');
+        if (key && rest.length) {
+          frontmatter[key.trim()] = rest.join(':').trim().replace(/^["']|["']$/g, '');
+        }
+      });
+      todayContent = {
+        title: frontmatter.title || 'Today',
+        date: frontmatter.date || todayStr,
+        content: match[2].trim()
+      };
+      hasToday = true;
+    }
+  }
+} catch (e) {
+  // No today file
+}
+
+// Get builds
+let builds: { slug: string; title: string; date: string; tags: string[] }[] = [];
+try {
+  const buildsDir = path.join(contentDir, 'builds');
+  if (fs.existsSync(buildsDir)) {
+    builds = fs.readdirSync(buildsDir)
+      .filter(f => f.endsWith('.md'))
+      .map(f => {
+        const content = fs.readFileSync(path.join(buildsDir, f), 'utf-8');
+        const match = content.match(/^---\n([\s\S]*?)\n---/);
+        if (match) {
+          const fm: Record<string, string> = {};
+          match[1].split('\n').forEach(line => {
+            const [key, ...rest] = line.split(':');
+            if (key && rest.length) {
+              fm[key.trim()] = rest.join(':').trim().replace(/^["']|["']$/g, '');
+            }
+          });
+          return {
+            slug: f.replace('.md', ''),
+            title: fm.title || f,
+            date: fm.date || '1970-01-01',
+            tags: fm.tags ? fm.tags.split(',').map(t => t.trim()) : []
+          };
+        }
+        return null;
+      })
+      .filter(Boolean) as typeof builds;
+  }
+} catch (e) {
+  // No builds
+}
+
+// Get books
+let books: { id: string; title: string; authors: string[]; status: string; year: number; rating?: number }[] = [];
+try {
+  const booksJsonPath = path.join(contentDir, 'data', 'books.json');
+  if (fs.existsSync(booksJsonPath)) {
+    books = JSON.parse(fs.readFileSync(booksJsonPath, 'utf-8'));
+  }
+} catch (e) {
+  // No books
+}
+
+// Get graph data
+let graphData = { nodes: [], links: [] };
+try {
+  const graphPath = path.join(process.cwd(), 'public', 'graph.json');
+  if (fs.existsSync(graphPath)) {
+    graphData = JSON.parse(fs.readFileSync(graphPath, 'utf-8'));
+  }
+} catch (e) {
+  // No graph
+}
 ---
 
-<PageLayout title="Abdullah Shahid - Home" description="Personal site of Abdullah Shahid">
-  <TerminalHero latestPosts={latestPosts} />
-</PageLayout>
+<TerminalLayout title="abdullah.shahid | terminal">
+  <TodayPane todayContent={todayContent} hasToday={hasToday} />
+  <GraphPane graphData={graphData} />
+  <BuildsPane builds={builds} />
+  <BooksPane books={books} />
+</TerminalLayout>

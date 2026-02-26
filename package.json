@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro build",
+    "prebuild": "node scripts/validate-content.js",
+    "build": "npm run prebuild && astro build",
     "preview": "astro preview",
     "astro": "astro",
     "index-search": "pagefind --source ./dist",

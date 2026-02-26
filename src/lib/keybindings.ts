@@ -1,25 +1,35 @@
 export interface KeyBinding {
   key: string;
   sequence?: string[];
-  modifiers?: ('ctrl' | 'alt' | 'shift')[];
+  modifiers?: string[];
   action: () => void;
   description: string;
   preventDefault?: boolean;
 }
 
 export const keyBindings: KeyBinding[] = [
+  // Slash commands
   {
     key: '/',
     action: () => window.dispatchEvent(new CustomEvent('open-command-palette')),
-    description: 'Open command palette',
+    description: 'Open slash command palette',
     preventDefault: true
   },
+  // Vim-style commands
+  {
+    key: ':',
+    action: () => window.dispatchEvent(new CustomEvent('open-command-bar')),
+    description: 'Open vim command bar',
+    preventDefault: true
+  },
+  // Search
   {
     key: '?',
     action: () => window.dispatchEvent(new CustomEvent('open-search')),
     description: 'Open search',
     preventDefault: true
   },
+  // Escape closes overlays
   {
     key: 'Escape',
     action: () => {
@@ -27,6 +37,7 @@ export const keyBindings: KeyBinding[] = [
     },
     description: 'Close overlays'
   },
+  // Ctrl+K opens slash
   {
     key: 'k',
     modifiers: ['ctrl'],
@@ -34,6 +45,7 @@ export const keyBindings: KeyBinding[] = [
     description: 'Open command palette (Ctrl+K)',
     preventDefault: true
   },
+  // Navigation sequences
   {
     key: 'b',
     modifiers: ['g'],
@@ -75,6 +87,54 @@ export const keyBindings: KeyBinding[] = [
     sequence: ['g', 'h'],
     action: () => window.location.href = '/',
     description: 'Go to Home (G H)'
+  },
+  // Pane navigation
+  {
+    key: 'h',
+    modifiers: ['ctrl'],
+    action: () => window.dispatchEvent(new CustomEvent('pane-left')),
+    description: 'Navigate pane left (Ctrl+H)'
+  },
+  {
+    key: 'j',
+    modifiers: ['ctrl'],
+    action: () => window.dispatchEvent(new CustomEvent('pane-down')),
+    description: 'Navigate pane down (Ctrl+J)'
+  },
+  {
+    key: 'k',
+    modifiers: ['ctrl'],
+    action: () => window.dispatchEvent(new CustomEvent('pane-up')),
+    description: 'Navigate pane up (Ctrl+K)'
+  },
+  {
+    key: 'l',
+    modifiers: ['ctrl'],
+    action: () => window.dispatchEvent(new CustomEvent('pane-right')),
+    description: 'Navigate pane right (Ctrl+L)'
+  },
+  // Graph controls
+  {
+    key: 'r',
+    action: () => window.dispatchEvent(new CustomEvent('graph-reset')),
+    description: 'Reset graph view (R)'
+  },
+  {
+    key: 'f',
+    action: () => window.dispatchEvent(new CustomEvent('graph-focus')),
+    description: 'Focus selected node in graph (F)'
+  },
+  // Enter to maximize pane
+  {
+    key: 'Enter',
+    action: () => window.dispatchEvent(new CustomEvent('pane-maximize')),
+    description: 'Maximize current pane (Enter)'
+  },
+  // Tab for autocomplete in command bar
+  {
+    key: 'Tab',
+    action: () => window.dispatchEvent(new CustomEvent('command-autocomplete')),
+    description: 'Autocomplete command (Tab)'
   }
 ];
 
@@ -91,31 +151,62 @@ export function initKeyBindings() {
       return;
     }
 
-    if (isInput) return;
+    // Allow keybindings in input for certain keys
+    const isCtrl = e.ctrlKey || e.metaKey;
+    
+    // Handle pane navigation with Ctrl+hljk even in inputs
+    if (isCtrl && ['h', 'j', 'k', 'l'].includes(e.key)) {
+      e.preventDefault();
+      if (e.key === 'h') window.dispatchEvent(new CustomEvent('pane-left'));
+      if (e.key === 'j') window.dispatchEvent(new CustomEvent('pane-down'));
+      if (e.key === 'k') window.dispatchEvent(new CustomEvent('pane-up'));
+      if (e.key === 'l') window.dispatchEvent(new CustomEvent('pane-right'));
+      return;
+    }
+    
+    if (isInput) {
+      // Still handle : and / in input for command activation
+      if (e.key === ':' || e.key === '/') {
+        // Let it pass through to activate
+      } else {
+        return;
+      }
+    }
 
-    const matchingBinding = keyBindings.find(binding => {
-      if (binding.sequence) {
+    // Check modifier-based bindings first
+    const modifierBinding = keyBindings.find(binding => {
+      if (!binding.modifiers?.length) return false;
+      const modifiersMatch = binding.modifiers.every(mod => {
+        if (mod === 'ctrl') return isCtrl;
+        if (mod === 'alt') return e.altKey;
+        if (mod === 'shift') return e.shiftKey;
         return false;
+      });
+      return modifiersMatch && e.key.toLowerCase() === binding.key.toLowerCase();
+    });
+
+    if (modifierBinding) {
+      if (modifierBinding.preventDefault) {
+        e.preventDefault();
       }
-      if (binding.modifiers?.length) {
-        const modifiersMatch = binding.modifiers.every(mod => {
-          if (mod === 'ctrl') return e.ctrlKey;
-          if (mod === 'alt') return e.altKey;
-          if (mod === 'shift') return e.shiftKey;
-          return false;
-        });
-        return modifiersMatch && e.key.toLowerCase() === binding.key.toLowerCase();
-      }
+      modifierBinding.action();
+      return;
+    }
+
+    // Check simple key bindings
+    const simpleBinding = keyBindings.find(binding => {
+      if (binding.sequence || binding.modifiers?.length) return false;
       return e.key.toLowerCase() === binding.key.toLowerCase();
     });
 
-    if (matchingBinding) {
-      if (matchingBinding.preventDefault) {
+    if (simpleBinding) {
+      if (simpleBinding.preventDefault) {
         e.preventDefault();
       }
-      matchingBinding.action();
+      simpleBinding.action();
     }
 
+    // Handle key sequences (G + key)
     sequence.push(e.key.toLowerCase());
     
     if (sequenceTimeout) clearTimeout(sequenceTimeout);

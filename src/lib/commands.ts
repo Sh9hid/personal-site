@@ -8,6 +8,7 @@ export interface Command {
 }
 
 export const commands: Command[] = [
+  // Navigation
   {
     id: 'home',
     label: 'Home',
@@ -21,7 +22,7 @@ export const commands: Command[] = [
     label: 'Books',
     description: 'Browse books shelf',
     action: () => window.location.href = '/books',
-    keywords: ['books', 'reading', 'library', 'shelf'],
+    keywords: ['books', 'reading', 'library'],
     category: 'navigation'
   },
   {
@@ -29,7 +30,7 @@ export const commands: Command[] = [
     label: 'Builds',
     description: 'View build logs',
     action: () => window.location.href = '/builds',
-    keywords: ['builds', 'logs', 'projects', 'development'],
+    keywords: ['builds', 'logs', 'projects'],
     category: 'navigation'
   },
   {
@@ -53,15 +54,15 @@ export const commands: Command[] = [
     label: 'Stack',
     description: 'Tech stack',
     action: () => window.location.href = '/stack',
-    keywords: ['stack', 'tech', 'technology', 'tools'],
+    keywords: ['stack', 'tech', 'tools'],
     category: 'navigation'
   },
   {
     id: 'now',
     label: 'Now',
-    description: 'What I\'m doing now',
+    description: "What I'm doing now",
     action: () => window.location.href = '/now',
-    keywords: ['now', 'current', 'nowadays'],
+    keywords: ['now', 'current'],
     category: 'navigation'
   },
   {
@@ -69,7 +70,7 @@ export const commands: Command[] = [
     label: 'Today',
     description: 'Daily log',
     action: () => window.location.href = '/today',
-    keywords: ['today', 'daily', 'log', 'journal'],
+    keywords: ['today', 'daily', 'log'],
     category: 'navigation'
   },
   {
@@ -77,7 +78,15 @@ export const commands: Command[] = [
     label: 'Stats',
     description: 'Site statistics',
     action: () => window.location.href = '/stats',
-    keywords: ['stats', 'statistics', 'numbers', 'metrics'],
+    keywords: ['stats', 'statistics', 'numbers'],
+    category: 'navigation'
+  },
+  {
+    id: 'shortcuts',
+    label: 'Shortcuts',
+    description: 'Keyboard shortcuts',
+    action: () => window.location.href = '/shortcuts',
+    keywords: ['shortcuts', 'keys', 'keyboard'],
     category: 'navigation'
   },
   {
@@ -85,7 +94,7 @@ export const commands: Command[] = [
     label: 'RSS Feed',
     description: 'Subscribe to RSS',
     action: () => window.location.href = '/rss.xml',
-    keywords: ['rss', 'feed', 'subscribe'],
+    keywords: ['rss', 'feed'],
     category: 'navigation'
   },
   {
@@ -93,9 +102,10 @@ export const commands: Command[] = [
     label: 'Sitemap',
     description: 'View sitemap',
     action: () => window.location.href = '/sitemap-index.xml',
-    keywords: ['sitemap', 'map', 'navigation'],
+    keywords: ['sitemap', 'map'],
     category: 'navigation'
   },
+  // Actions
   {
     id: 'random',
     label: 'Random Page',
@@ -105,7 +115,7 @@ export const commands: Command[] = [
       const random = pages[Math.floor(Math.random() * pages.length)];
       window.location.href = random;
     },
-    keywords: ['random', 'randomize', 'surprise'],
+    keywords: ['random', 'surprise'],
     category: 'action'
   },
   {
@@ -121,17 +131,28 @@ export const commands: Command[] = [
     label: 'Search',
     description: 'Search the site',
     action: () => window.dispatchEvent(new CustomEvent('open-search')),
-    keywords: ['search', 'find', 'query'],
+    keywords: ['search', 'find'],
+    category: 'action'
+  },
+  {
+    id: 'graph',
+    label: 'Graph',
+    description: 'Focus graph view',
+    action: () => window.dispatchEvent(new CustomEvent('focus-graph')),
+    keywords: ['graph', 'network', 'view'],
     category: 'action'
   },
   {
     id: 'theme',
     label: 'Toggle Theme',
-    description: 'Switch light/dark theme',
+    description: 'Switch mono/dev theme',
     action: () => {
-      document.documentElement.classList.toggle('light');
+      const current = document.body.getAttribute('data-theme');
+      const next = current === 'dev' ? 'mono' : 'dev';
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
     },
-    keywords: ['theme', 'light', 'dark', 'mode'],
+    keywords: ['theme', 'mono', 'dev'],
     category: 'action'
   },
   {
@@ -141,7 +162,7 @@ export const commands: Command[] = [
     action: () => {
       document.body.classList.toggle('high-contrast');
     },
-    keywords: ['contrast', 'accessibility', 'a11y', 'high'],
+    keywords: ['contrast', 'accessibility'],
     category: 'action'
   },
   {
@@ -149,15 +170,7 @@ export const commands: Command[] = [
     label: 'Help',
     description: 'Show keyboard shortcuts',
     action: () => window.location.href = '/shortcuts',
-    keywords: ['help', 'shortcuts', 'keys', 'keyboard'],
-    category: 'action'
-  },
-  {
-    id: 'shortcuts',
-    label: 'Shortcuts',
-    description: 'View all keyboard shortcuts',
-    action: () => window.location.href = '/shortcuts',
-    keywords: ['shortcuts', 'keys', 'keyboard', 'bindings'],
+    keywords: ['help', 'shortcuts'],
     category: 'action'
   }
 ];

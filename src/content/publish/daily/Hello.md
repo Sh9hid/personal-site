@@ -1,5 +1,4 @@
 ---
-id: "hello"
 title: "Hello World"
 date: "2026-02-27"
 type: "daily"

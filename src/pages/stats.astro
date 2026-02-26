@@ -1,54 +1,133 @@
 ---
-import PageLayout from '../layouts/PageLayout.astro';
+import TerminalLayout from '../layouts/TerminalLayout.astro';
+import { getCollection } from 'astro:content';
+
+const notes = await getCollection('publish', ({ data }) => data.publish === true);
+
+const currentYear = new Date().getFullYear();
+
+let totalBuilds = 0;
+let totalProjects = 0;
+let totalNotesCount = 0;
+let booksReadThisYear = 0;
+const tagCounts = new Map();
+let totalWordCount = 0;
+let linkCount = 0;
+
+let firstPostDate = '9999-99-99';
+let latestPostDate = '0000-00-00';
+
+for (const note of notes) {
+  const date = note.data.date;
+  
+  if (date < firstPostDate) firstPostDate = date;
+  if (date > latestPostDate) latestPostDate = date;
+  
+  totalWordCount += note.body?.split(/\s+/).length || 0;
+  
+  const filePath = note.id.toLowerCase();
+  if (filePath.includes('/builds/') || note.data.type === 'build') {
+    totalBuilds++;
+  } else if (filePath.includes('/projects/') || note.data.type === 'project') {
+    totalProjects++;
+  } else {
+    totalNotesCount++;
+  }
+  
+  if ((filePath.includes('/books/') || note.data.type === 'reading') && date.startsWith(currentYear.toString())) {
+    if (note.body?.toLowerCase().includes('status') && (note.body?.toLowerCase().includes('read') || note.body?.toLowerCase().includes('finished'))) {
+      booksReadThisYear++;
+    }
+  }
+  
+  for (const tag of note.data.tags) {
+    tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+  }
+}
+
+const sortedTags = Array.from(tagCounts.entries())
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 5)
+  .map(([tag, count]) => ({ tag, count }));
 
 const stats = {
-  totalPosts: 5,
-  totalBuilds: 1,
-  totalProjects: 1,
-  booksReadThisYear: 2,
-  totalWords: 1250,
-  topTags: ['astro', 'typescript', 'react', 'productivity']
+  totalNotes: notes.length,
+  totalBuilds,
+  totalProjects,
+  totalNotesCount,
+  booksReadThisYear,
+  totalTags: tagCounts.size,
+  topTags: sortedTags,
+  totalWordCount,
+  firstPostDate: firstPostDate === '9999-99-99' ? 'N/A' : firstPostDate,
+  latestPostDate: latestPostDate === '0000-00-00' ? 'N/A' : latestPostDate,
+  linkCount
 };
 ---
 
-<PageLayout title="Stats - Abdullah Shahid" description="Site statistics">
-  <section>
-    <h1 class="text-2xl font-bold text-terminal-fg mb-6">Stats</h1>
+<TerminalLayout title="stats">
+  <div class="pane" style="grid-column: 1 / -1; grid-row: 1 / -1; overflow: auto;">
+    <div class="pane-header">stats</div>
     
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-      <div class="p-6 border border-terminal-dim/30 rounded-lg text-center">
-        <div class="text-3xl font-bold text-terminal-fg">{stats.totalPosts}</div>
-        <div class="text-terminal-dim text-sm mt-1">Posts</div>
+    <section class="mb-6">
+      <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
+        <div>
+          <div class="text-3xl text-accent">{stats.totalNotes}</div>
+          <div class="text-meta">total notes</div>
+        </div>
+        <div>
+          <div class="text-3xl text-accent">{stats.totalBuilds}</div>
+          <div class="text-meta">builds</div>
+        </div>
+        <div>
+          <div class="text-3xl text-accent">{stats.totalProjects}</div>
+          <div class="text-meta">projects</div>
+        </div>
+        <div>
+          <div class="text-3xl text-accent">{stats.booksReadThisYear}</div>
+          <div class="text-meta">books read (this year)</div>
+        </div>
+        <div>
+          <div class="text-3xl text-accent">{stats.totalWordCount.toLocaleString()}</div>
+          <div class="text-meta">total words</div>
+        </div>
+        <div>
+          <div class="text-3xl text-accent">{stats.linkCount}</div>
+          <div class="text-meta">total links</div>
+        </div>
       </div>
-      
-      <div class="p-6 border border-terminal-dim/30 rounded-lg text-center">
-        <div class="text-3xl font-bold text-terminal-fg">{stats.totalBuilds}</div>
-        <div class="text-terminal-dim text-sm mt-1">Builds</div>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-meta mb-2">// timeline</h2>
+      <table class="w-full" style="border-collapse: collapse;">
+        <tbody>
+          <tr>
+            <td class="py-1 text-meta">first post</td>
+            <td class="py-1">{stats.firstPostDate}</td>
+          </tr>
+          <tr>
+            <td class="py-1 text-meta">latest post</td>
+            <td class="py-1">{stats.latestPostDate}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-meta mb-2">// top tags</h2>
+      <div>
+        {stats.topTags.length > 0 ? (
+          stats.topTags.map((tag) => (
+            <span class="mr-4">
+              <span class="text-accent">{tag.tag}</span>
+              <span class="text-meta ml-1">({tag.count})</span>
+            </span>
+          ))
+        ) : (
+          <span class="text-meta">no tags</span>
+        )}
       </div>
-      
-      <div class="p-6 border border-terminal-dim/30 rounded-lg text-center">
-        <div class="text-3xl font-bold text-terminal-fg">{stats.totalProjects}</div>
-        <div class="text-terminal-dim text-sm mt-1">Projects</div>
-      </div>
-      
-      <div class="p-6 border border-terminal-dim/30 rounded-lg text-center">
-        <div class="text-3xl font-bold text-terminal-fg">{stats.booksReadThisYear}</div>
-        <div class="text-terminal-dim text-sm mt-1">Books (2026)</div>
-      </div>
-    </div>
-    
-    <div class="mt-8 p-6 border border-terminal-dim/30 rounded-lg">
-      <h2 class="text-terminal-fg font-semibold mb-4">Total Words Written</h2>
-      <div class="text-4xl font-bold text-terminal-fg">{stats.totalWords.toLocaleString()}</div>
-    </div>
-    
-    <div class="mt-8 p-6 border border-terminal-dim/30 rounded-lg">
-      <h2 class="text-terminal-fg font-semibold mb-4">Top Tags</h2>
-      <div class="flex flex-wrap gap-2">
-        {stats.topTags.map(tag => (
-          <span class="px-3 py-1.5 bg-terminal-dim/10 text-terminal-fg rounded">{tag}</span>
-        ))}
-      </div>
-    </div>
-  </section>
-</PageLayout>
+    </section>
+  </div>
+</TerminalLayout>

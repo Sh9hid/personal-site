@@ -1,5 +1,4 @@
 ---
-id: "now"
 title: "Now"
 date: "2026-02-01"
 type: "note"
