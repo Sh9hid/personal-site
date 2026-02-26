@@ -1,0 +1,66 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import BooksShelf from '../components/BooksShelf.astro';
+
+const books = [
+  {
+    id: '1',
+    title: 'The Pragmatic Programmer',
+    authors: ['David Thomas', 'Andrew Hunt'],
+    status: 'read' as const,
+    year: 2019,
+    rating: 5,
+    pages: 352,
+    description: 'Your journey to mastery. A classic book on software development practices.',
+    shelves: ['programming', 'career']
+  },
+  {
+    id: '2',
+    title: 'Clean Code',
+    authors: ['Robert C. Martin'],
+    status: 'read' as const,
+    year: 2008,
+    rating: 4,
+    pages: 464,
+    description: 'A Handbook of Agile Software Craftsmanship.',
+    shelves: ['programming', 'best-practices']
+  },
+  {
+    id: '3',
+    title: 'Designing Data-Intensive Applications',
+    authors: ['Martin Kleppmann'],
+    status: 'reading' as const,
+    year: 2017,
+    pages: 616,
+    description: 'The Big Ideas Behind Reliable, Scalable, and Maintainable Systems.',
+    shelves: ['systems', 'databases']
+  },
+  {
+    id: '4',
+    title: 'Structure and Interpretation of Computer Programs',
+    authors: ['Harold Abelson', 'Gerald Jay Sussman'],
+    status: 'to-read' as const,
+    year: 1996,
+    pages: 657,
+    description: 'The classic CS textbook using Scheme.',
+    shelves: ['cs-fundamentals', 'programming']
+  },
+  {
+    id: '5',
+    title: 'The DevOps Handbook',
+    authors: ['Gene Kim', 'Jez Humble', 'Patrick Debois'],
+    status: 'to-read' as const,
+    year: 2016,
+    pages: 480,
+    description: 'How to Create World-Class Agility, Reliability, and Security in Technology Organizations.',
+    shelves: ['devops', 'operations']
+  }
+];
+---
+
+<PageLayout title="Books - Abdullah Shahid" description="My book collection and reading list">
+  <section>
+    <h1 class="text-2xl font-bold text-terminal-fg mb-6">Books</h1>
+    <BooksShelf books={books} />
+  </section>
+</PageLayout>

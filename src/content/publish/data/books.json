@@ -1,0 +1,61 @@
+[
+  {
+    "id": "1",
+    "title": "The Pragmatic Programmer",
+    "authors": ["David Thomas", "Andrew Hunt"],
+    "status": "read",
+    "year": 2019,
+    "isbn": "978-0135957059",
+    "rating": 5,
+    "pages": 352,
+    "shelves": ["programming", "career"],
+    "description": "Your journey to mastery. A classic book on software development practices.",
+    "date_read": "2025-12-15"
+  },
+  {
+    "id": "2",
+    "title": "Clean Code",
+    "authors": ["Robert C. Martin"],
+    "status": "read",
+    "year": 2008,
+    "isbn": "978-0132350884",
+    "rating": 4,
+    "pages": 464,
+    "shelves": ["programming", "best-practices"],
+    "description": "A Handbook of Agile Software Craftsmanship.",
+    "date_read": "2025-11-20"
+  },
+  {
+    "id": "3",
+    "title": "Designing Data-Intensive Applications",
+    "authors": ["Martin Kleppmann"],
+    "status": "reading",
+    "year": 2017,
+    "isbn": "978-1449373320",
+    "pages": 616,
+    "shelves": ["systems", "databases"],
+    "description": "The Big Ideas Behind Reliable, Scalable, and Maintainable Systems."
+  },
+  {
+    "id": "4",
+    "title": "Structure and Interpretation of Computer Programs",
+    "authors": ["Harold Abelson", "Gerald Jay Sussman"],
+    "status": "to-read",
+    "year": 1996,
+    "isbn": "978-0262510871",
+    "pages": 657,
+    "shelves": ["cs-fundamentals", "programming"],
+    "description": "The classic CS textbook using Scheme."
+  },
+  {
+    "id": "5",
+    "title": "The DevOps Handbook",
+    "authors": ["Gene Kim", "Jez Humble", "Patrick Debois"],
+    "status": "to-read",
+    "year": 2016,
+    "isbn": "978-1942788003",
+    "pages": 480,
+    "shelves": ["devops", "operations"],
+    "description": "How to Create World-Class Agility, Reliability, and Security in Technology Organizations."
+  }
+]

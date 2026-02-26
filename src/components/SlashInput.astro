@@ -1,0 +1,180 @@
+---
+import Fuse from 'fuse.js';
+
+const commands = [
+  { id: 'home', label: 'Home', description: 'Go to homepage', action: () => window.location.href = '/', keywords: ['home', 'start', 'main'], category: 'navigation' },
+  { id: 'books', label: 'Books', description: 'Browse books shelf', action: () => window.location.href = '/books', keywords: ['books', 'reading', 'library'], category: 'navigation' },
+  { id: 'builds', label: 'Builds', description: 'View build logs', action: () => window.location.href = '/builds', keywords: ['builds', 'logs', 'projects'], category: 'navigation' },
+  { id: 'projects', label: 'Projects', description: 'View projects', action: () => window.location.href = '/projects', keywords: ['projects', 'work', 'portfolio'], category: 'navigation' },
+  { id: 'reading', label: 'Reading', description: 'Currently reading', action: () => window.location.href = '/reading', keywords: ['reading', 'currently', 'progress'], category: 'navigation' },
+  { id: 'stack', label: 'Stack', description: 'Tech stack', action: () => window.location.href = '/stack', keywords: ['stack', 'tech', 'tools'], category: 'navigation' },
+  { id: 'now', label: 'Now', description: "What I'm doing now", action: () => window.location.href = '/now', keywords: ['now', 'current'], category: 'navigation' },
+  { id: 'today', label: 'Today', description: 'Daily log', action: () => window.location.href = '/today', keywords: ['today', 'daily', 'log'], category: 'navigation' },
+  { id: 'stats', label: 'Stats', description: 'Site statistics', action: () => window.location.href = '/stats', keywords: ['stats', 'statistics', 'numbers'], category: 'navigation' },
+  { id: 'rss', label: 'RSS Feed', description: 'Subscribe to RSS', action: () => window.location.href = '/rss.xml', keywords: ['rss', 'feed'], category: 'navigation' },
+  { id: 'sitemap', label: 'Sitemap', description: 'View sitemap', action: () => window.location.href = '/sitemap-index.xml', keywords: ['sitemap', 'map'], category: 'navigation' },
+  { id: 'random', label: 'Random Page', description: 'Go to a random page', action: () => { const pages = ['/books', '/builds', '/projects', '/reading', '/stack', '/now', '/today']; window.location.href = pages[Math.floor(Math.random() * pages.length)]; }, keywords: ['random', 'surprise'], category: 'action' },
+  { id: 'search', label: 'Search', description: 'Search the site', action: () => window.dispatchEvent(new CustomEvent('open-search')), keywords: ['search', 'find'], category: 'action' },
+  { id: 'theme', label: 'Toggle Theme', description: 'Switch light/dark theme', action: () => document.documentElement.classList.toggle('light'), keywords: ['theme', 'light', 'dark'], category: 'action' },
+  { id: 'contrast', label: 'High Contrast', description: 'Toggle high contrast mode', action: () => document.body.classList.toggle('high-contrast'), keywords: ['contrast', 'accessibility'], category: 'action' },
+  { id: 'help', label: 'Help', description: 'Show keyboard shortcuts', action: () => window.location.href = '/shortcuts', keywords: ['help', 'shortcuts', 'keys'], category: 'action' }
+];
+
+const fuse = new Fuse(commands, {
+  keys: ['label', 'description', 'keywords'],
+  threshold: 0.4,
+  includeMatches: true
+});
+
+const commandsJson = JSON.stringify(commands);
+---
+
+<div id="command-palette" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-start justify-center pt-[15vh]">
+  <div class="w-full max-w-xl bg-[#0a0a0a] border border-[#00aa2a]/30 rounded-lg shadow-2xl overflow-hidden" onclick="event.stopPropagation()">
+    <div class="border-b border-[#00aa2a]/30 px-4 py-3">
+      <input
+        type="text"
+        id="command-input"
+        placeholder="Type a command..."
+        class="w-full bg-transparent text-[#00ff41] placeholder-[#00aa2a]/50 outline-none text-lg font-mono"
+        autocomplete="off"
+      />
+    </div>
+    
+    <div id="command-list" class="max-h-[50vh] overflow-y-auto">
+      {commands.map((cmd, index) => (
+        <button
+          data-command={cmd.id}
+          class="command-item w-full px-4 py-3 text-left flex items-center justify-between transition-colors hover:bg-[#00ff41]/10"
+        >
+          <div>
+            <div class="font-medium text-[#00ff41]">{cmd.label}</div>
+            <div class="text-sm text-[#00aa2a]">{cmd.description}</div>
+          </div>
+          <span class={`text-xs px-2 py-1 rounded ${cmd.category === 'navigation' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}`}>
+            {cmd.category}
+          </span>
+        </button>
+      ))}
+    </div>
+    
+    <div class="border-t border-[#00aa2a]/30 px-4 py-2 text-xs text-[#00aa2a] flex items-center gap-4">
+      <span><kbd class="px-1.5 py-0.5 bg-[#00aa2a]/20 rounded">↑↓</kbd> navigate</span>
+      <span><kbd class="px-1.5 py-0.5 bg-[#00aa2a]/20 rounded">↵</kbd> select</span>
+      <span><kbd class="px-1.5 py-0.5 bg-[#00aa2a]/20 rounded">esc</kbd> close</span>
+    </div>
+  </div>
+</div>
+
+<script define:vars={{ commandsJson }}>
+  const commands = JSON.parse(commandsJson);
+  let selectedIndex = 0;
+  let currentResults = [...commands];
+  
+  const palette = document.getElementById('command-palette');
+  const input = document.getElementById('command-input');
+  const list = document.getElementById('command-list');
+  
+  function openPalette() {
+    palette.classList.remove('hidden');
+    input.value = '';
+    currentResults = [...commands];
+    selectedIndex = 0;
+    renderResults();
+    setTimeout(() => input.focus(), 0);
+  }
+  
+  function closePalette() {
+    palette.classList.add('hidden');
+  }
+  
+  function renderResults() {
+    list.innerHTML = currentResults.map((cmd, i) => `
+      <button
+        data-command="${cmd.id}"
+        class="command-item w-full px-4 py-3 text-left flex items-center justify-between transition-colors ${i === selectedIndex ? 'bg-[#00ff41]/10 text-[#00ff41]' : 'text-gray-300 hover:bg-[#00aa2a]/10'}"
+      >
+        <div>
+          <div class="font-medium">${cmd.label}</div>
+          <div class="text-sm text-[#00aa2a]">${cmd.description}</div>
+        </div>
+        <span class="text-xs px-2 py-1 rounded ${cmd.category === 'navigation' ? 'bg-blue-500/20 text-blue-400' : 'bg-purple-500/20 text-purple-400'}">
+          ${cmd.category}
+        </span>
+      </button>
+    `).join('');
+    
+    const selected = list.children[selectedIndex];
+    if (selected) selected.scrollIntoView({ block: 'nearest' });
+  }
+  
+  function executeCommand(cmd) {
+    cmd.action();
+    closePalette();
+  }
+  
+  input?.addEventListener('input', (e) => {
+    const query = e.target.value;
+    if (!query.trim()) {
+      currentResults = [...commands];
+    } else {
+      const results = fuse.search(query);
+      currentResults = results.map(r => r.item);
+    }
+    selectedIndex = 0;
+    renderResults();
+  });
+  
+  input?.addEventListener('keydown', (e) => {
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        selectedIndex = Math.min(selectedIndex + 1, currentResults.length - 1);
+        renderResults();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        selectedIndex = Math.max(selectedIndex - 1, 0);
+        renderResults();
+        break;
+      case 'Enter':
+        e.preventDefault();
+        if (currentResults[selectedIndex]) {
+          executeCommand(currentResults[selectedIndex]);
+        }
+        break;
+      case 'Escape':
+        closePalette();
+        break;
+    }
+  });
+  
+  list?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.command-item');
+    if (btn) {
+      const cmd = currentResults.find(c => c.id === btn.dataset.command);
+      if (cmd) executeCommand(cmd);
+    }
+  });
+  
+  palette?.addEventListener('click', (e) => {
+    if (e.target === palette) closePalette();
+  });
+  
+  window.addEventListener('open-command-palette', openPalette);
+  window.addEventListener('close-overlays', closePalette);
+  
+  document.addEventListener('keydown', (e) => {
+    const target = e.target;
+    const isInput = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+    
+    if (e.key === '/' && !isInput) {
+      e.preventDefault();
+      openPalette();
+    }
+    
+    if (e.key === 'Escape') {
+      closePalette();
+    }
+  });
+</script>

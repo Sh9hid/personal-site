@@ -1,0 +1,42 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+
+const today = new Date().toISOString().split('T')[0];
+---
+
+<PageLayout title="Today - Abdullah Shahid" description="Daily log">
+  <section>
+    <h1 class="text-2xl font-bold text-terminal-fg mb-2">Today</h1>
+    <p class="text-terminal-dim mb-6">{today}</p>
+    
+    <div class="space-y-8">
+      <div>
+        <h2 class="text-terminal-fg font-semibold mb-3">What I Worked On</h2>
+        <ul class="list-disc list-inside text-gray-300 space-y-1">
+          <li>Building personal site</li>
+        </ul>
+      </div>
+      
+      <div>
+        <h2 class="text-terminal-fg font-semibold mb-3">What I Learned</h2>
+        <ul class="list-disc list-inside text-gray-300 space-y-1">
+          <li>Something new today</li>
+        </ul>
+      </div>
+      
+      <div>
+        <h2 class="text-terminal-fg font-semibold mb-3">Blockers</h2>
+        <ul class="list-disc list-inside text-gray-300 space-y-1">
+          <li>None</li>
+        </ul>
+      </div>
+      
+      <div>
+        <h2 class="text-terminal-fg font-semibold mb-3">Ideas</h2>
+        <ul class="list-disc list-inside text-gray-300 space-y-1">
+          <li>Future ideas go here</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</PageLayout>

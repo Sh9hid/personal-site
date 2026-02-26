@@ -1,0 +1,52 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import SlashInput from '../components/SlashInput.astro';
+import SearchOverlay from '../components/SearchOverlay.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  type?: 'website' | 'article' | 'book' | 'software';
+}
+
+const { title, description, type } = Astro.props;
+---
+
+<BaseLayout title={title} description={description} type={type}>
+  <header class="border-b border-terminal-dim/30 px-6 py-4">
+    <nav class="max-w-4xl mx-auto flex items-center justify-between">
+      <a href="/" class="text-terminal-fg hover:text-terminal-highlight font-semibold text-lg">
+        ~/home
+      </a>
+      <div class="flex items-center gap-6 text-sm">
+        <a href="/books" class="hover:text-terminal-fg transition-colors">Books</a>
+        <a href="/builds" class="hover:text-terminal-fg transition-colors">Builds</a>
+        <a href="/projects" class="hover:text-terminal-fg transition-colors">Projects</a>
+        <a href="/reading" class="hover:text-terminal-fg transition-colors">Reading</a>
+        <a href="/stack" class="hover:text-terminal-fg transition-colors">Stack</a>
+        <a href="/now" class="hover:text-terminal-fg transition-colors">Now</a>
+        <a href="/stats" class="hover:text-terminal-fg transition-colors">Stats</a>
+      </div>
+    </nav>
+  </header>
+  
+  <main id="main-content" class="max-w-4xl mx-auto px-6 py-8">
+    <slot />
+  </main>
+  
+  <footer class="border-t border-terminal-dim/30 px-6 py-6 mt-auto">
+    <div class="max-w-4xl mx-auto flex items-center justify-between text-sm text-terminal-dim">
+      <div class="flex gap-4">
+        <a href="/rss.xml" class="hover:text-terminal-fg transition-colors">RSS</a>
+        <a href="/sitemap-index.xml" class="hover:text-terminal-fg transition-colors">Sitemap</a>
+        <a href="https://github.com/username/personal-site" target="_blank" rel="noopener" class="hover:text-terminal-fg transition-colors">Source</a>
+      </div>
+      <div class="flex gap-4">
+        <span>Press <kbd class="px-1.5 py-0.5 bg-terminal-dim/20 rounded text-xs">/</kbd> to navigate</span>
+      </div>
+    </div>
+  </footer>
+  
+  <SlashInput />
+  <SearchOverlay />
+</BaseLayout>

@@ -1,0 +1,72 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  type?: 'website' | 'article' | 'book' | 'software';
+}
+
+const { title, description = 'Personal site', type = 'website' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  </head>
+  <body class="bg-terminal-bg text-gray-200 font-mono min-h-screen">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-terminal-fg focus:text-terminal-bg">
+      Skip to content
+    </a>
+    <slot />
+    <script is:inline>
+      window.addEventListener('DOMContentLoaded', async () => {
+        if (typeof window !== 'undefined') {
+          try {
+            window.pagefind = await import('/pagefind/pagefind.js');
+          } catch (e) {
+            console.log('Pagefind not available');
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --color-high-contrast: 0;
+  }
+  
+  .high-contrast {
+    --color-high-contrast: 1;
+  }
+  
+  * {
+    outline-width: 2px;
+  }
+  
+  *:focus-visible {
+    outline: 2px solid #00ff41;
+    outline-offset: 2px;
+  }
+  
+  ::selection {
+    background: #00ff41;
+    color: #0a0a0a;
+  }
+</style>

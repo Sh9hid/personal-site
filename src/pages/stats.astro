@@ -1,0 +1,54 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+
+const stats = {
+  totalPosts: 5,
+  totalBuilds: 1,
+  totalProjects: 1,
+  booksReadThisYear: 2,
+  totalWords: 1250,
+  topTags: ['astro', 'typescript', 'react', 'productivity']
+};
+---
+
+<PageLayout title="Stats - Abdullah Shahid" description="Site statistics">
+  <section>
+    <h1 class="text-2xl font-bold text-terminal-fg mb-6">Stats</h1>
+    
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="p-6 border border-terminal-dim/30 rounded-lg text-center">
+        <div class="text-3xl font-bold text-terminal-fg">{stats.totalPosts}</div>
+        <div class="text-terminal-dim text-sm mt-1">Posts</div>
+      </div>
+      
+      <div class="p-6 border border-terminal-dim/30 rounded-lg text-center">
+        <div class="text-3xl font-bold text-terminal-fg">{stats.totalBuilds}</div>
+        <div class="text-terminal-dim text-sm mt-1">Builds</div>
+      </div>
+      
+      <div class="p-6 border border-terminal-dim/30 rounded-lg text-center">
+        <div class="text-3xl font-bold text-terminal-fg">{stats.totalProjects}</div>
+        <div class="text-terminal-dim text-sm mt-1">Projects</div>
+      </div>
+      
+      <div class="p-6 border border-terminal-dim/30 rounded-lg text-center">
+        <div class="text-3xl font-bold text-terminal-fg">{stats.booksReadThisYear}</div>
+        <div class="text-terminal-dim text-sm mt-1">Books (2026)</div>
+      </div>
+    </div>
+    
+    <div class="mt-8 p-6 border border-terminal-dim/30 rounded-lg">
+      <h2 class="text-terminal-fg font-semibold mb-4">Total Words Written</h2>
+      <div class="text-4xl font-bold text-terminal-fg">{stats.totalWords.toLocaleString()}</div>
+    </div>
+    
+    <div class="mt-8 p-6 border border-terminal-dim/30 rounded-lg">
+      <h2 class="text-terminal-fg font-semibold mb-4">Top Tags</h2>
+      <div class="flex flex-wrap gap-2">
+        {stats.topTags.map(tag => (
+          <span class="px-3 py-1.5 bg-terminal-dim/10 text-terminal-fg rounded">{tag}</span>
+        ))}
+      </div>
+    </div>
+  </section>
+</PageLayout>

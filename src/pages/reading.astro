@@ -1,0 +1,50 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+
+const currentlyReading = [
+  {
+    title: 'Designing Data-Intensive Applications',
+    author: 'Martin Kleppmann',
+    progress: 45,
+    cover: null
+  }
+];
+---
+
+<PageLayout title="Reading - Abdullah Shahid" description="Currently reading">
+  <section>
+    <h1 class="text-2xl font-bold text-terminal-fg mb-6">Currently Reading</h1>
+    
+    {currentlyReading.length > 0 ? (
+      <div class="space-y-6">
+        {currentlyReading.map(book => (
+          <div class="flex gap-6 p-6 border border-terminal-dim/30 rounded-lg">
+            <div class="w-24 h-36 bg-terminal-dim/20 rounded flex items-center justify-center flex-shrink-0">
+              <svg class="w-8 h-8 text-terminal-dim" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5 6.253v13C4.477 3.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-terminal-fg">{book.title}</h3>
+              <p class="text-terminal-dim">{book.author}</p>
+              <div class="mt-4">
+                <div class="flex justify-between text-sm text-terminal-dim mb-1">
+                  <span>Progress</span>
+                  <span>{book.progress}%</span>
+                </div>
+                <div class="h-2 bg-terminal-dim/20 rounded-full overflow-hidden">
+                  <div 
+                    class="h-full bg-terminal-fg rounded-full transition-all"
+                    style={`width: ${book.progress}%`}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    ) : (
+      <p class="text-terminal-dim">Not reading anything right now.</p>
+    )}
+  </section>
+</PageLayout>

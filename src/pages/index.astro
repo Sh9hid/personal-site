@@ -1,0 +1,14 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import TerminalHero from '../components/TerminalHero.astro';
+
+const latestPosts = [
+  { title: 'Welcome to my site', date: '2026-01-01', type: 'note', url: '/now' },
+  { title: 'My Tech Stack', date: '2026-01-15', type: 'note', url: '/stack' },
+  { title: 'Currently Reading', date: '2026-02-01', type: 'reading', url: '/reading' },
+];
+---
+
+<PageLayout title="Abdullah Shahid - Home" description="Personal site of Abdullah Shahid">
+  <TerminalHero latestPosts={latestPosts} />
+</PageLayout>

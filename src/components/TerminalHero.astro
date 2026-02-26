@@ -1,0 +1,74 @@
+---
+interface Props {
+  latestPosts?: Array<{
+    title: string;
+    date: string;
+    type: string;
+    url: string;
+  }>;
+}
+
+const { latestPosts = [] } = Astro.props;
+
+const shortcuts = [
+  { keys: '/', action: 'Open command palette' },
+  { keys: '?', action: 'Search the site' },
+  { keys: 'G B', action: 'Go to Books' },
+  { keys: 'G P', action: 'Go to Projects' },
+  { keys: 'G D', action: 'Go to Builds' },
+  { keys: 'G T', action: 'Go to Today' },
+  { keys: 'G S', action: 'Go to Stats' },
+];
+---
+
+<section class="min-h-[60vh] flex flex-col justify-center">
+  <div class="space-y-2 text-terminal-fg">
+    <p class="text-terminal-dim">$ whoami</p>
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight">
+      Abdullah Shahid
+    </h1>
+    <p class="text-xl text-terminal-dim mt-2">
+      Developer, builder, lifelong learner
+    </p>
+  </div>
+
+  <div class="mt-8 p-4 border border-terminal-dim/30 rounded-lg bg-terminal-dim/5 max-w-md">
+    <p class="text-terminal-dim mb-3">Quick navigation:</p>
+    <div class="grid grid-cols-2 gap-2 text-sm">
+      {shortcuts.map(({ keys, action }) => (
+        <div class="flex items-center gap-2">
+          <kbd class="px-2 py-1 bg-terminal-dim/20 rounded text-terminal-fg font-mono text-xs">
+            {keys}
+          </kbd>
+          <span class="text-gray-400">{action}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {latestPosts.length > 0 && (
+    <div class="mt-12">
+      <h2 class="text-terminal-dim mb-4">// latest entries</h2>
+      <div class="space-y-2">
+        {latestPosts.map(post => (
+          <a 
+            href={post.url}
+            class="block group"
+          >
+            <div class="flex items-baseline justify-between">
+              <span class="text-terminal-fg group-hover:text-terminal-highlight transition-colors">
+                {post.title}
+              </span>
+              <span class="text-terminal-dim text-sm font-mono">{post.date}</span>
+            </div>
+            <span class="text-terminal-dim text-sm">{post.type}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <div class="mt-12 animate-blink">
+    <span class="text-terminal-fg">_</span>
+  </div>
+</section>

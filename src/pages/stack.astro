@@ -1,0 +1,64 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+
+const stack = {
+  languages: ['TypeScript', 'JavaScript', 'Python', 'Go'],
+  frontend: ['React', 'Astro', 'Tailwind CSS', 'Next.js'],
+  backend: ['Node.js', 'Express', 'PostgreSQL'],
+  devops: ['Docker', 'GitHub Actions', 'Vercel'],
+  tools: ['VS Code', 'Git', 'Figma', 'Obsidian']
+};
+---
+
+<PageLayout title="Stack - Abdullah Shahid" description="My tech stack and tools">
+  <section>
+    <h1 class="text-2xl font-bold text-terminal-fg mb-6">Stack</h1>
+    
+    <div class="grid md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-terminal-dim mb-3">Languages</h2>
+        <div class="flex flex-wrap gap-2">
+          {stack.languages.map(tech => (
+            <span class="px-3 py-1.5 bg-terminal-dim/10 text-terminal-fg rounded">{tech}</span>
+          ))}
+        </div>
+      </div>
+      
+      <div>
+        <h2 class="text-terminal-dim mb-3">Frontend</h2>
+        <div class="flex flex-wrap gap-2">
+          {stack.frontend.map(tech => (
+            <span class="px-3 py-1.5 bg-terminal-dim/10 text-terminal-fg rounded">{tech}</span>
+          ))}
+        </div>
+      </div>
+      
+      <div>
+        <h2 class="text-terminal-dim mb-3">Backend</h2>
+        <div class="flex flex-wrap gap-2">
+          {stack.backend.map(tech => (
+            <span class="px-3 py-1.5 bg-terminal-dim/10 text-terminal-fg rounded">{tech}</span>
+          ))}
+        </div>
+      </div>
+      
+      <div>
+        <h2 class="text-terminal-dim mb-3">DevOps</h2>
+        <div class="flex flex-wrap gap-2">
+          {stack.devops.map(tech => (
+            <span class="px-3 py-1.5 bg-terminal-dim/10 text-terminal-fg rounded">{tech}</span>
+          ))}
+        </div>
+      </div>
+      
+      <div>
+        <h2 class="text-terminal-dim mb-3">Tools</h2>
+        <div class="flex flex-wrap gap-2">
+          {stack.tools.map(tech => (
+            <span class="px-3 py-1.5 bg-terminal-dim/10 text-terminal-fg rounded">{tech}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  </section>
+</PageLayout>

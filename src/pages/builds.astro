@@ -1,0 +1,32 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import ProjectCase from '../components/ProjectCase.astro';
+
+const builds = [
+  {
+    title: 'Personal Site v2',
+    description: 'Built a terminal-style personal website with Astro, featuring slash-command navigation and keyboard-first UX.',
+    tags: ['Astro', 'TypeScript', 'Tailwind', 'React'],
+    url: 'https://github.com/username/personal-site',
+    repo: 'https://github.com/username/personal-site',
+    date: '2026-02-01'
+  }
+];
+---
+
+<PageLayout title="Builds - Abdullah Shahid" description="Build logs and technical deep-dives">
+  <section>
+    <h1 class="text-2xl font-bold text-terminal-fg mb-2">Builds</h1>
+    <p class="text-terminal-dim mb-8">Technical deep-dives into projects I've worked on.</p>
+    
+    {builds.length > 0 ? (
+      <div class="space-y-6">
+        {builds.map(build => (
+          <ProjectCase {...build} />
+        ))}
+      </div>
+    ) : (
+      <p class="text-terminal-dim">No builds yet. Check back soon!</p>
+    )}
+  </section>
+</PageLayout>

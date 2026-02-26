@@ -1,0 +1,155 @@
+---
+interface Book {
+  id: string;
+  title: string;
+  authors: string[];
+  status: 'read' | 'to-read' | 'reading';
+  year: number;
+  isbn?: string;
+  cover?: string;
+  description?: string;
+  rating?: number;
+  pages?: number;
+  shelves?: string[];
+  date_read?: string;
+}
+
+interface Props {
+  books: Book[];
+}
+
+const { books } = Astro.props;
+
+const statusColors = {
+  'read': 'bg-green-500/20 text-green-400',
+  'reading': 'bg-blue-500/20 text-blue-400',
+  'to-read': 'bg-yellow-500/20 text-yellow-400'
+};
+---
+
+<div class="books-shelf" role="grid" aria-label="Books collection">
+  <div class="flex gap-4 mb-6 flex-wrap" role="group" aria-label="Filter controls">
+    <button 
+      class="filter-btn px-3 py-1.5 rounded text-sm bg-terminal-fg/20 text-terminal-fg"
+      data-filter="all"
+    >
+      All
+    </button>
+    <button 
+      class="filter-btn px-3 py-1.5 rounded text-sm bg-terminal-dim/10 text-gray-400 hover:bg-terminal-dim/20"
+      data-filter="read"
+    >
+      Read
+    </button>
+    <button 
+      class="filter-btn px-3 py-1.5 rounded text-sm bg-terminal-dim/10 text-gray-400 hover:bg-terminal-dim/20"
+      data-filter="reading"
+    >
+      Reading
+    </button>
+    <button 
+      class="filter-btn px-3 py-1.5 rounded text-sm bg-terminal-dim/10 text-gray-400 hover:bg-terminal-dim/20"
+      data-filter="to-read"
+    >
+      To Read
+    </button>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" role="rowgroup">
+    {books.map((book, index) => (
+      <article 
+        class="book-card group cursor-pointer" 
+        role="gridcell"
+        tabindex="0"
+        data-status={book.status}
+        data-index={index}
+      >
+        <div class="aspect-[3/4] bg-terminal-dim/10 rounded-lg overflow-hidden relative mb-3">
+          {book.cover ? (
+            <img 
+              src={book.cover} 
+              alt={`Cover of ${book.title}`}
+              class="w-full h-full object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div class="w-full h-full flex items-center justify-center text-terminal-dim">
+              <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+          )}
+          
+          <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-4">
+            <div class="text-center">
+              <p class="text-sm text-gray-300 line-clamp-4">{book.description}</p>
+              {book.rating && (
+                <div class="mt-2 text-yellow-400">
+                  {'★'.repeat(book.rating)}{'☆'.repeat(5 - book.rating)}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        
+        <h3 class="font-medium text-terminal-fg group-hover:text-terminal-highlight truncate">
+          {book.title}
+        </h3>
+        <p class="text-sm text-terminal-dim truncate">{book.authors.join(', ')}</p>
+        <div class="flex items-center gap-2 mt-1">
+          <span class={`text-xs px-2 py-0.5 rounded ${statusColors[book.status]}`}>
+            {book.status}
+          </span>
+          <span class="text-xs text-terminal-dim">{book.year}</span>
+        </div>
+      </article>
+    ))}
+  </div>
+</div>
+
+<script>
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const bookCards = document.querySelectorAll('.book-card');
+  
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filter = btn.getAttribute('data-filter');
+      
+      filterBtns.forEach(b => {
+        b.classList.remove('bg-terminal-fg/20', 'text-terminal-fg');
+        b.classList.add('bg-terminal-dim/10', 'text-gray-400');
+      });
+      btn.classList.remove('bg-terminal-dim/10', 'text-gray-400');
+      btn.classList.add('bg-terminal-fg/20', 'text-terminal-fg');
+      
+      bookCards.forEach(card => {
+        const status = card.getAttribute('data-status');
+        if (filter === 'all' || status === filter) {
+          (card as HTMLElement).style.display = '';
+        } else {
+          (card as HTMLElement).style.display = 'none';
+        }
+      });
+    });
+  });
+  
+  document.querySelectorAll('.book-card').forEach((card, index) => {
+    card.addEventListener('keydown', (e) => {
+      const key = (e as KeyboardEvent).key;
+      const cards = Array.from(document.querySelectorAll('.book-card')) as HTMLElement[];
+      const currentIndex = cards.indexOf(card as HTMLElement);
+      
+      if (key === 'ArrowRight' || key === 'ArrowDown') {
+        e.preventDefault();
+        const nextIndex = (currentIndex + 1) % cards.length;
+        cards[nextIndex]?.focus();
+      } else if (key === 'ArrowLeft' || key === 'ArrowUp') {
+        e.preventDefault();
+        const prevIndex = currentIndex === 0 ? cards.length - 1 : currentIndex - 1;
+        cards[prevIndex]?.focus();
+      } else if (key === 'Enter') {
+        (card as HTMLElement).click();
+      }
+    });
+  });
+</script>
