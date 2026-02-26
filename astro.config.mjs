@@ -6,7 +6,9 @@ export default defineConfig({
   site: 'https://sh9hid.github.io',
   base: '/',
   integrations: [
-    tailwind(),
+    tailwind({
+      applyBaseStyles: false
+    }),
     sitemap()
   ],
   markdown: {
@@ -19,7 +21,7 @@ export default defineConfig({
     ]
   },
   build: {
-    inlineStylesheets: 'auto'
+    inlineStylesheets: 'always'
   },
   compressHTML: true
 });

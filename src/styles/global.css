@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-terminal-bg: #0a0a0a;
+    --color-terminal-fg: #00ff41;
+    --color-terminal-dim: #00aa2a;
+  }
+  
+  body {
+    background-color: var(--color-terminal-bg);
+    color: #e5e5e5;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  
+  .high-contrast {
+    --color-terminal-bg: #000000;
+    --color-terminal-fg: #00ff00;
+    --color-terminal-dim: #00cc00;
+  }
+}
+
+@layer utilities {
+  .text-terminal-fg { color: #00ff41; }
+  .text-terminal-dim { color: #00aa2a; }
+  .bg-terminal-bg { background-color: #0a0a0a; }
+  .border-terminal-dim\/30 { border-color: rgba(0, 170, 42, 0.3); }
+  .hover\:text-terminal-fg:hover { color: #00ff41; }
+  .hover\:text-terminal-highlight:hover { color: #00ff41; }
+  .hover\:border-terminal-fg\/50:hover { border-color: rgba(0, 255, 65, 0.5); }
+  .bg-terminal-dim\/10 { background-color: rgba(0, 170, 42, 0.1); }
+  .bg-terminal-dim\/20 { background-color: rgba(0, 170, 42, 0.2); }
+  .bg-terminal-dim\/5 { background-color: rgba(0, 170, 42, 0.05); }
+  .bg-terminal-fg\/20 { background-color: rgba(0, 255, 65, 0.2); }
+  .bg-terminal-fg { background-color: #00ff41; }
+  .group:hover .group-hover\:text-terminal-highlight { color: #00ff41; }
+  .group-hover\:opacity-100 { opacity: 1; }
+}

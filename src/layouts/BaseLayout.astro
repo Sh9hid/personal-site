@@ -1,4 +1,6 @@
 ---
+import '../styles/global.css';
+
 interface Props {
   title: string;
   description?: string;
@@ -28,8 +30,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
-  <body class="bg-terminal-bg text-gray-200 font-mono min-h-screen">
-    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-terminal-fg focus:text-terminal-bg">
+  <body class="bg-[#0a0a0a] text-gray-200 font-mono min-h-screen">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:px-4 focus:py-2 focus:bg-[#00ff41] focus:text-[#0a0a0a]">
       Skip to content
     </a>
     <slot />
@@ -48,6 +50,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 </html>
 
 <style is:global>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+  
   :root {
     --color-high-contrast: 0;
   }
@@ -69,4 +73,11 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
     background: #00ff41;
     color: #0a0a0a;
   }
+
+  /* Ensure all pages have terminal styling */
+  .text-terminal-fg { color: #00ff41; }
+  .text-terminal-dim { color: #00aa2a; }
+  .bg-terminal-bg { background-color: #0a0a0a; }
+  .border-terminal-dim\/30 { border-color: rgba(0, 170, 42, 0.3); }
+  .hover\:text-terminal-fg:hover { color: #00ff41; }
 </style>
